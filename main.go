@@ -7,7 +7,9 @@ import (
 
 func getRank(w http.ResponseWriter, req *http.Request){
 	fmt.Println("get rank begin")
-	fmt.Fprintf(w, "Ranking:")
+	r := "Ranking"
+	fmt.Fprintf(w, r)
+	fmt.Println("sending: " + r)
 }
 
 func main(){
