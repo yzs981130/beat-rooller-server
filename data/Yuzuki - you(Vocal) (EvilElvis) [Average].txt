@@ -1,0 +1,9 @@
+format :v14
+Title:you(Vocal)
+TitleUnicode:you(Vocal)
+Artist:Yuzuki
+ArtistUnicode:癒月
+Creator:EvilElvis
+Version:Average
+Source:ひぐらしのなく頃に解
+Tags:dear -kevincela- ryuu Seikatu DexFrild Higurashi no Naku Koro ni dai M.Graveyard 07th Expansion

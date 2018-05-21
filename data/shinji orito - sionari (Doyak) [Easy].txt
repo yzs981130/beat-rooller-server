@@ -1,0 +1,9 @@
+format :v14
+Title:sionari
+TitleUnicode:潮鳴り
+Artist:shinji orito
+ArtistUnicode:折戸伸治
+Creator:Doyak
+Version:Easy
+Source:CLANNAD
+Tags:Rizen Visual Arts Key Sounds Label Roaring Tides Shionari
