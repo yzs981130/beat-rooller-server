@@ -28,7 +28,7 @@ func generateJSONResult(searchName string) {
 		return nil
 	})
 
-	var name, musician, imgLink, musicLink string
+	var name, musician, imgLink, musicLink, difficulty, mapLink string
 
 	for _, v := range files {
 		fmt.Println(v)
@@ -49,7 +49,9 @@ func generateJSONResult(searchName string) {
 				musician = js.Get("Artist").MustString()
 				imgLink = path.Join("osz", v, js.Get("bgFilename").MustString())
 				musicLink = path.Join("osz", v, js.Get("AudioFilename").MustString())
-				fmt.Printf("musician:%s\timgLink:%s\tmusicLink:%s\n", musician, imgLink, musicLink)
+				difficulty = js.Get("Version").MustString()
+				mapLink = path.Join("data", strings.Split(info.Name(), ".")[0] + ".csv")
+				fmt.Printf("musician:%s\timgLink:%s\tmusicLink:%s\tdifficulty:%s\tmapLink:%s\n", musician, imgLink, musicLink, difficulty, mapLink)
 			}
 			return nil
 		})
