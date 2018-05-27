@@ -11,6 +11,7 @@ import (
 	"github.com/natsukagami/go-osu-parser"
 	"encoding/json"
 	"github.com/bitly/go-simplejson"
+	"strconv"
 )
 
 type SearchResult struct {
@@ -94,9 +95,7 @@ func generateJSONResult(searchName string) SearchResult {
 
 
 
-
-
-func getRank(w http.ResponseWriter, req *http.Request){
+func getRank(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("get rank begin")
 	r := "Ranking"
 	fmt.Fprintf(w, r)
@@ -120,10 +119,45 @@ func getSearchResult(w http.ResponseWriter, req *http.Request){
 	w.Write(js)
 }
 
+
+func upload(w http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	if err != nil {
+		fmt.Println("upload parse error:" + err.Error())
+	}
+	fmt.Println("upload post begins")
+	username := req.Form["username"][0]
+	password := req.Form["password"][0]
+	musicname := req.Form["musicname"][0]
+	difficulty, _ := strconv.Atoi(req.Form["difficulty"][0])
+	rank := req.Form["rank"][0]
+	score, _ := strconv.Atoi(req.Form["score"][0])
+	fmt.Printf("username:%s\npassword:%s\nmusicname:%s\ndifficulty:%d\nrank:%s\nscore:%d\n", username, password, musicname, difficulty, rank, score)
+	fmt.Println("upload post ends")
+
+}
+
+
+func signup(w http.ResponseWriter, req *http.Request) {
+	err := req.ParseForm()
+	if err != nil {
+		fmt.Println("signup parse error:" + err.Error())
+	}
+	fmt.Println("signup post begins")
+	username := req.Form["username"][0]
+	password := req.Form["password"][0]
+	fmt.Println("signup post begins")
+	fmt.Printf("username:%s\npassword:%s\n", username, password)
+	fmt.Println("signup post ends")
+
+}
+
 func main(){
 	fmt.Println("starting")
 	http.HandleFunc("/rank", getRank)
 	http.HandleFunc("/search", getSearchResult)
+	http.HandleFunc("/upload", upload)
+	http.HandleFunc("/signup", signup)
 	err := http.ListenAndServe("127.0.0.1:8080", nil)
 	if err != nil{
 		fmt.Println("listen error")
