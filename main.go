@@ -13,12 +13,29 @@ import (
 	"github.com/bitly/go-simplejson"
 )
 
+type SearchResult struct {
+	Results []Result `json:"results"`
+}
 
-func generateJSONResult(searchName string) {
-	fmt.Println("entering")
+type Result struct {
+	Name string
+	Musician string
+	ImgLink string
+	MusicLink string
+	LevelData []LevelData
+}
+
+type LevelData struct {
+	Difficulty int
+	MapLink string
+}
+
+
+func generateJSONResult(searchName string) SearchResult {
 	wdpathname, _ := os.Getwd()
 	pathname := path.Join(wdpathname, "osz")
 	fmt.Println("pathname:" + pathname)
+	var r SearchResult
 	var files []string
 	filepath.Walk(pathname, func(p string, info os.FileInfo, err error) error {
 		if info.IsDir() && strings.Contains(info.Name(), searchName) && info.Name() != "osz" {
@@ -28,7 +45,13 @@ func generateJSONResult(searchName string) {
 		return nil
 	})
 
-	var name, musician, imgLink, musicLink, difficulty, mapLink string
+	if len(files) == 0 {
+		fmt.Println("no matches for " + searchName)
+		return r
+	}
+
+	var name, musician, imgLink, musicLink, mapLink string
+	var difficulty int
 
 	for _, v := range files {
 		fmt.Println(v)
@@ -37,6 +60,7 @@ func generateJSONResult(searchName string) {
 		nPathname := path.Join(pathname, v)
 		fmt.Println("new pathname:" + nPathname)
 
+		var singleResult Result
 		filepath.Walk(nPathname, func(p string, info os.FileInfo, err error) error {
 			if !info.IsDir() && filepath.Ext(info.Name()) == ".osu" {
 				fmt.Println("osu file:" + info.Name())
@@ -49,14 +73,27 @@ func generateJSONResult(searchName string) {
 				musician = js.Get("Artist").MustString()
 				imgLink = path.Join("osz", v, js.Get("bgFilename").MustString())
 				musicLink = path.Join("osz", v, js.Get("AudioFilename").MustString())
-				difficulty = js.Get("Version").MustString()
+				difficulty = js.Get("OverallDifficulty").MustInt()
 				mapLink = path.Join("data", strings.Split(info.Name(), ".")[0] + ".csv")
-				fmt.Printf("musician:%s\timgLink:%s\tmusicLink:%s\tdifficulty:%s\tmapLink:%s\n", musician, imgLink, musicLink, difficulty, mapLink)
+				fmt.Printf("musician:%s\timgLink:%s\tmusicLink:%s\tdifficulty:%d\tmapLink:%s\n", musician, imgLink, musicLink, difficulty, mapLink)
+				singleResult.Name = name
+				singleResult.Musician = musician
+				singleResult.ImgLink = imgLink
+				singleResult.MusicLink = musicLink
+				var singleResultLevelData LevelData
+				singleResultLevelData.Difficulty = difficulty
+				singleResultLevelData.MapLink = mapLink
+				singleResult.LevelData = append(singleResult.LevelData, singleResultLevelData)
 			}
 			return nil
 		})
+		r.Results = append(r.Results, singleResult)
 	}
+	return r
 }
+
+
+
 
 
 func getRank(w http.ResponseWriter, req *http.Request){
@@ -69,13 +106,21 @@ func getRank(w http.ResponseWriter, req *http.Request){
 func getSearchResult(w http.ResponseWriter, req *http.Request){
 	t, _ := ioutil.ReadAll(req.Body)
 	req.Body.Close()
-	result := string(t)
-	fmt.Println("result:" + result)
-
+	fmt.Println("searchname:" + string(t))
+	js, err := json.Marshal(generateJSONResult(string(t)))
+	if err != nil {
+		fmt.Println("error converting:" + err.Error())
+	}
+	fmt.Println("post response begins")
+	os.Stdout.Write(js)
+	fmt.Println()
+	fmt.Println("post response ends")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(js)
 }
 
 func main(){
-	/*
 	fmt.Println("starting")
 	http.HandleFunc("/rank", getRank)
 	http.HandleFunc("/search", getSearchResult)
@@ -83,6 +128,4 @@ func main(){
 	if err != nil{
 		fmt.Println("listen error")
 	}
-	*/
-	generateJSONResult("o")
 }
